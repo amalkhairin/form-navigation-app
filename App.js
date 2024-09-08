@@ -7,32 +7,89 @@ import HomePage from './src/pages/HomePage';
 import ProductPage from './src/pages/ProductPage';
 import { NavigationContainer } from '@react-navigation/native';
 import LoginPage from './src/pages/LoginPage';
+import {
+  MD3LightTheme as DefaultTheme,
+  PaperProvider,
+} from 'react-native-paper';
+import RegisterPage from './src/pages/RegisterPage';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { createMaterialBottomTabNavigator } from 'react-native-paper/react-navigation';
+import { Provider } from 'react-redux';
+import store from './src/redux/store';
+import ProductDetailPage from './src/pages/ProductDetailPage';
 
 const Stack = createNativeStackNavigator();
-const Tabs = createBottomTabNavigator();
+const Tabs = createMaterialBottomTabNavigator();
+
+const theme = {
+  ...DefaultTheme,
+  // Specify custom property
+  myOwnProperty: true,
+  // Specify custom property in nested object
+  colors: {
+    ...DefaultTheme.colors,
+    myOwnColor: '#BADA55',
+  },
+};
 
 function TabsNavigator() {
   return (
-    <Tabs.Navigator>
-      <Tabs.Screen name="Home" component={HomePage} />
-      <Tabs.Screen name="Product" component={ProductPage} />
+    <Tabs.Navigator
+      activeColor='#52467F'
+      inactiveColor='grey'
+      // shifting={true}
+      screenOptions={tabOptions}
+      barStyle={{
+        backgroundColor: 'white',
+        borderTopWidth: 1,
+        borderColor: '#E0E0E0',
+      }}
+    >
+      <Tabs.Screen name="Home" options={{ headerShown: false }} component={HomePage} />
+      <Tabs.Screen name="Product" options={{ headerShown: false }} component={ProductPage} />
     </Tabs.Navigator>
   );
+}
+
+const tabOptions = ({ route }) => ({
+  headerShown: false,
+  tabBarIcon: ({ focused, color, size }) => {
+    let icon = tabIconMap[route.name];
+    if (!focused) {
+      icon = `${icon}-outline`;
+    }
+    return <MaterialCommunityIcons name={icon} size={24} color={color} />;
+  }
+})
+
+const screenOptions = {
+  headerShown: false
+}
+
+const tabIconMap = {
+  Home: 'home-variant',
+  Product: 'cube',
 }
 
 export default function App() {
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName='Login'>
-            <Stack.Screen name="Tabs" component={TabsNavigator} options={{ headerShown: false }} />
-            <Stack.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <Provider store={store}>
+      <PaperProvider>
+        <SafeAreaProvider>
+          <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+            <NavigationContainer>
+              <Stack.Navigator screenOptions={screenOptions} initialRouteName='Tabs'>
+                <Stack.Screen name="Tabs" component={TabsNavigator} />
+                <Stack.Screen name="Login" component={LoginPage} />
+                <Stack.Screen name="Register" component={RegisterPage} />
+                <Stack.Screen name="ProductDetail" component={ProductDetailPage} />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </SafeAreaView>
+        </SafeAreaProvider>
+      </PaperProvider>
+    </Provider>
   );
 }
 
